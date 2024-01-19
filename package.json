@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/kamelbendi/sendme-node/issues"
   },
-  "homepage": "https://github.com/kamelbendi/sendme-node#readme"
+  "homepage": "https://github.com/kamelbendi/sendme-node#readme",
+  "dependencies": {
+    "yarn": "^1.22.21"
+  }
 }
