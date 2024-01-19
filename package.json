@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/kamelbendi/sendme-node#readme",
   "dependencies": {
+    "express": "^4.18.2",
     "yarn": "^1.22.21"
   }
 }
