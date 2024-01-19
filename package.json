@@ -1,0 +1,19 @@
+{
+  "name": "sendme-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamelbendi/sendme-node.git"
+  },
+  "author": "Kamel Bendimerad",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kamelbendi/sendme-node/issues"
+  },
+  "homepage": "https://github.com/kamelbendi/sendme-node#readme"
+}
