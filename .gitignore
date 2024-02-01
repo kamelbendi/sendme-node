@@ -1,2 +1,5 @@
 node_modules
-database_access.json
+logfile.log
+yarn.lock
+package.json
+package-lock.json
