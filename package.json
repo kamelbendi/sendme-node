@@ -29,5 +29,8 @@
     "textflow.js": "^0.1.4",
     "winston": "^3.11.0",
     "yarn": "^1.22.21"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
   }
 }

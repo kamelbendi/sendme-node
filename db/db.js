@@ -3,7 +3,7 @@ const { Pool } = require('pg');
 // Replace the following with your PostgreSQL connection string
 const connectionString = 'postgresql://postgres@localhost:5432/';
 
-const pool = new Pool({
+let pool = new Pool({
   connectionString: connectionString,
 });
 
@@ -11,24 +11,56 @@ const pool = new Pool({
 const databaseName = 'sendme_pg';
 
 // Create the database
-exports.createDatabase = async () => {
+const createDatabase = async () => {
     try {
-        const client = await pool.connect();
-          // Create the database
-          await client.query(`CREATE DATABASE ${databaseName}`);
-          console.log(`Database '${databaseName}' created successfully.`);
+          //Create the database
+        await pool.query(`CREATE DATABASE ${databaseName}`);
+        await pool.end();
+
+        await createUsersTable();
     } catch {
         console.error('Error creating database');
     }
 }
 
-exports.deleteDatabase = async () => {
+const createUsersTable = async () => {
+    pool = new Pool({
+        user: 'postgres',
+        host: 'localhost',
+        port: 5432,
+        database: databaseName, // Connecting to the new database
+      });
+
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(50),
+            surname VARCHAR(50),
+            username VARCHAR(50) UNIQUE,
+            email VARCHAR(100) UNIQUE,
+            phone VARCHAR(15),
+            pin VARCHAR(4),
+            password VARCHAR(255),
+            balance DECIMAL DEFAULT 1000
+        );
+      `);
+    console.log('Table "users" created successfully');
+    console.log(`Database '${databaseName}' created successfully.`);
+};
+
+const deleteDatabase = async () => {
     try {
-        const client = await pool.connect();
-          // Create the database
-          await client.query(`DROP DATABASE ${databaseName} WITH (FORCE)`);
-          console.log(`Database '${databaseName}' deleted successfully.`);
+          // delete the database
+        await pool.query(`DROP DATABASE IF EXISTS ${databaseName} WITH (FORCE)`);
+        console.log(`Database '${databaseName}' deleted successfully.`);
     } catch {
         console.error('Error deleting database');
     }
+}
+
+console.log('pool exported')
+module.exports = {
+    createDatabase,
+    deleteDatabase,
+    pool
 }
