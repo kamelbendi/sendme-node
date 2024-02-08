@@ -4,9 +4,10 @@ const authRoute = require('./routes/auth.js');
 const userRoute = require('./routes/user.js');
 const { createDatabase, deleteDatabase, createUsersTable } = require('./db/db.js');
 const { setupTestData } = require('./db/setup.js');
+const bcrypt = require('bcrypt');
 
 const app = express();
-
+process.env.JWT_SECRET = bcrypt.hash('maximumsecuritystring1234', 10);
 winston.add(new winston.transports.File({ filename: 'logfile.log' }));
 
 process.on('uncaughtException', (ex) => {
@@ -21,6 +22,8 @@ process.on('unhandledRejection', (ex) => {
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+app.use(authRoute);
+app.use(userRoute);
 
 const startApp = async () => {
     try {
@@ -33,8 +36,6 @@ const startApp = async () => {
 
         const port = process.env.PORT || 3000;
 
-        app.use(authRoute);
-        app.use(userRoute);
         app.use("*", (req, res) => {
             res.json("Page not found.");
         });
@@ -59,5 +60,4 @@ process.on('SIGINT', async () => {
     console.log('Received SIGINT. Exiting gracefully...');
     await deleteDatabase();
     process.exit(0);
-    console.log('reached here')
 });
