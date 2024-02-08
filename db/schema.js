@@ -10,7 +10,7 @@ const createHistoryTableForUser = async (clientID) => {
       );
     `);
   } catch {
-
+    console.error('Error creating history table');
   }
 }
 

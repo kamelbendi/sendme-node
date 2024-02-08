@@ -23,31 +23,35 @@ const createDatabase = async () => {
 }
 
 const createUsersTable = async () => {
-      global.pool = new Pool({
-        user: 'postgres',
-        host: 'localhost',
-        port: 5432,
-        database: databaseName, // Connecting to the new database
-      });
-
-      await global.pool.query(`
-        CREATE TABLE IF NOT EXISTS users (
-            id SERIAL PRIMARY KEY,
-            name VARCHAR(50),
-            surname VARCHAR(50),
-            username VARCHAR(50) UNIQUE,
-            email VARCHAR(100) UNIQUE,
-            phone VARCHAR(15),
-            pin VARCHAR(4),
-            password VARCHAR(255),
-            balance DECIMAL DEFAULT 1000,
-            account_number VARCHAR(10) UNIQUE,
-            card_number VARCHAR(16) UNIQUE,
-            cvv VARCHAR(3),
-            expiry_date DATE
-        );
-      `);
-    console.log('Table "users" created successfully');
+    try {
+        global.pool = new Pool({
+          user: 'postgres',
+          host: 'localhost',
+          port: 5432,
+          database: databaseName, // Connecting to the new database
+        });
+  
+        await global.pool.query(`
+          CREATE TABLE IF NOT EXISTS users (
+              id SERIAL PRIMARY KEY,
+              name VARCHAR(50),
+              surname VARCHAR(50),
+              username VARCHAR(50) UNIQUE,
+              email VARCHAR(100) UNIQUE,
+              phone VARCHAR(15),
+              pin VARCHAR(100),
+              password VARCHAR(255),
+              balance DECIMAL DEFAULT 1000,
+              account_number VARCHAR(10) UNIQUE,
+              card_number VARCHAR(16) UNIQUE,
+              cvv VARCHAR(3),
+              expiry_date DATE
+          );
+        `); 
+        console.log('Table "users" created successfully');
+    } catch {
+        console.error('Error creating table "users"');
+    }
 };
 
 const deleteDatabase = async () => {
