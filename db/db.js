@@ -41,7 +41,7 @@ const createUsersTable = async () => {
               phone VARCHAR(15),
               pin VARCHAR(100),
               password VARCHAR(255),
-              balance DECIMAL DEFAULT 1000,
+              balance DECIMAL DEFAULT 0,
               account_number VARCHAR(10) UNIQUE,
               card_number VARCHAR(16) UNIQUE,
               cvv VARCHAR(3),
