@@ -5,6 +5,7 @@ const userRoute = require('./routes/user.js');
 const { createDatabase, deleteDatabase, createUsersTable } = require('./db/db.js');
 const { setupTestData } = require('./db/setup.js');
 const bcrypt = require('bcrypt');
+const { createHistoryTableForUsers } = require('./db/schema.js');
 
 const app = express();
 process.env.JWT_SECRET = bcrypt.hash('maximumsecuritystring1234', 10);
@@ -29,6 +30,7 @@ const startApp = async () => {
     try {
         await createDatabase()
             .then(createUsersTable)
+            .then(createHistoryTableForUsers)
             .then(setupTestData)
             .catch((error) => {
                 console.error('Error setting up the schema:', error);
