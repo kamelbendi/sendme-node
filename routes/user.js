@@ -13,6 +13,93 @@ Router.get('/getqrcode', async (req, res) => {
     }
 });
 
+Router.post('/getaccountnumber', async (req, res) => {
+    const { username } = req.body;
+    try {
+      const queryResult = await global.pool.query('SELECT * FROM users WHERE username = $1;', [username]);
+
+        if (queryResult.rows.length > 0) {
+            const accountnumber = queryResult.rows[0].accountnumber;
+            res.status(200).json({ accountnumber });
+        } else {
+            
+            res.status(404).json({ error: 'Username not found' });
+        }
+    } catch (error) {
+        console.error('Error executing query:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+Router.post('/getbalance', async (req, res) => {
+    const { username } = req.body;
+
+    try {
+        const queryResult = await global.pool.query('SELECT * FROM users WHERE username = $1;', [username]);
+
+        if (queryResult.rows.length > 0) {
+          console.log(queryResult.rows[0].balance);
+            const balance = queryResult.rows[0].balance;
+            res.status(200).json({ balance });
+        } else {
+            
+            res.status(404).json({ error: 'Username not found' });
+        }
+    } catch (error) {
+        console.error('Error executing query:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+Router.post('/gettransactions', async (req, res) => {
+    const { username } = req.body;
+
+    try {
+        const queryResult = await global.pool.query(`
+        SELECT * FROM transactions 
+        WHERE username_sender = $1
+        UNION
+        SELECT * FROM transactions 
+        WHERE username_receiver = $1 
+        ORDER BY timestamp;
+        `,
+        [username]);
+
+        if (queryResult.rows.length > 0) {
+            const transactions = queryResult.rows;
+            res.status(200).json(transactions);
+        } else {
+            res.status(404).json({ error: 'Transactions not found' });
+        }
+    } catch (error) {
+        console.error('Error executing query:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+Router.post('/getcarddetails', async (req, res) => {
+    const { username } = req.body;
+
+    try {
+        // Query to get credit card details based on username
+        const queryResult = await global.pool.query(`
+            SELECT cardnumber, cvv, expirydate FROM users WHERE username = $1;
+        `, [username]);
+
+        // Check if the query returned any rows
+        if (queryResult.rows.length > 0) {
+            const cardDetails = queryResult.rows[0];
+            res.status(200).json(cardDetails);
+        } else {
+            // Username not found
+            res.status(404).json({ error: 'Username not found' });
+        }
+    } catch (error) {
+        console.error('Error executing query:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 Router.post('/register', async (req, res) => {
     const userData = req.body;
 
@@ -80,7 +167,7 @@ Router.post('/login', async (req, res) => {
         }
     
         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-          expiresIn: '5m'
+          expiresIn: '1d'
         });
 
         res.status(200).send({ token });
@@ -91,29 +178,38 @@ Router.post('/login', async (req, res) => {
 });
 
 Router.post('/pinlogin', async (req, res) => {
-    const { username, pin } = req.body;
-    console.log(username, pin)
+    const { email, pin } = req.body;
+    console.log(email, pin)
     try {
       // Query to check if the username already exists
-      const queryResult = await global.pool.query('SELECT * FROM users WHERE username = $1;', [username]);
+      const queryResult = await global.pool.query('SELECT * FROM users WHERE email = $1;', [email]);
       const user = queryResult.rows[0];
       if (user) {
-        console.log(user)
         const isPinMatch = await bcrypt.compare(pin, user.pin);
         if (isPinMatch) {
           const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-            expiresIn: '5m'
+            expiresIn: '1d'
           });
           res.status(200).send({ token });
         } else {
           res.status(400).send({ login_error: 'Check your login details and try again.' });
         }
       } else {
-        res.status(400).send({ login_error: 'Invalid username.' });
+        res.status(400).send({ login_error: 'Invalid email.' });
       }
     } catch (error) {
       console.error('Error executing query:', error);
       res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+Router.post('/user', async (req, res) => {
+    const { email } = req.body;
+    try {
+      const user = await global.pool.query('SELECT * FROM users WHERE email = $1', [email]);
+      res.status(200).send(user.rows[0]);
+    } catch (error) {
+      res.status(401).send({ error: 'Please authenticate.' });
     }
 });
 
