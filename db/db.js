@@ -42,10 +42,10 @@ const createUsersTable = async () => {
               pin VARCHAR(100),
               password VARCHAR(255),
               balance DECIMAL DEFAULT 0,
-              account_number VARCHAR(10) UNIQUE,
-              card_number VARCHAR(16) UNIQUE,
+              accountnumber VARCHAR(10) UNIQUE,
+              cardnumber VARCHAR(16) UNIQUE,
               cvv VARCHAR(3),
-              expiry_date DATE
+              expirydate VARCHAR(7)
           );
         `); 
         console.log('Table "users" created successfully');

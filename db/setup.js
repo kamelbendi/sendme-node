@@ -1,6 +1,5 @@
 const bcrypt = require('bcrypt');
-const { getRandomInt } = require('../helpers/help');
-const { get } = require('../routes/user');
+const { getRandomInt, generateRandomDigitsNumber, generateExpiryDate } = require('../helpers/help');
 
 const setupTestData = async () => {
   try {
@@ -17,19 +16,19 @@ const createDummyData = async () => {
     const encryptedPin = await bcrypt.hash('111111', 10);
 
     const testUsersData = [
-      { name: 'test1', surname: 'surname1', username: 'test1', email: 'test1@example.com', phone: '123456789', pin: encryptedPin, password: encryptedPassword, balance: 1500 },
-      { name: 'test2', surname: 'surname2', username: 'test2', email: 'test2@example.com', phone: '123456789', pin: encryptedPin, password: encryptedPassword, balance: 2000 },
-      { name: 'test3', surname: 'surname3', username: 'test3', email: 'test3@example.com', phone: '123456789', pin: encryptedPin, password: encryptedPassword, balance: 2500 },
-      { name: 'test4', surname: 'surname4', username: 'test4', email: 'test4@example.com', phone: '123456789', pin: encryptedPin, password: encryptedPassword, balance: 3000 },
-      { name: 'test5', surname: 'surname5', username: 'test5', email: 't@e.st', phone: '123456789', pin: encryptedPin, password: encryptedPassword, balance: 3000 },
+      { name: 'test1', surname: 'surname1', username: 'test1', email: 'test1@example.com', phone: '123456789', pin: encryptedPin, password: encryptedPassword, balance: 1500, cardnumber: generateRandomDigitsNumber(16), cvv: generateRandomDigitsNumber(3), expirydate: generateExpiryDate(), accountnumber: generateRandomDigitsNumber(10)},
+      { name: 'test2', surname: 'surname2', username: 'test2', email: 'test2@example.com', phone: '123456789', pin: encryptedPin, password: encryptedPassword, balance: 2000, cardnumber: generateRandomDigitsNumber(16), cvv: generateRandomDigitsNumber(3), expirydate: generateExpiryDate(), accountnumber: generateRandomDigitsNumber(10) },
+      { name: 'test3', surname: 'surname3', username: 'test3', email: 'test3@example.com', phone: '123456789', pin: encryptedPin, password: encryptedPassword, balance: 2500, cardnumber: generateRandomDigitsNumber(16), cvv: generateRandomDigitsNumber(3), expirydate: generateExpiryDate(), accountnumber: generateRandomDigitsNumber(10) },
+      { name: 'test4', surname: 'surname4', username: 'test4', email: 'test4@example.com', phone: '123456789', pin: encryptedPin, password: encryptedPassword, balance: 3000, cardnumber: generateRandomDigitsNumber(16), cvv: generateRandomDigitsNumber(3), expirydate: generateExpiryDate(), accountnumber: generateRandomDigitsNumber(10) },
+      { name: 'test5', surname: 'surname5', username: 'test5', email: 't@e.st', phone: '123456789', pin: encryptedPin, password: encryptedPassword, balance: 3000, cardnumber: generateRandomDigitsNumber(16), cvv: generateRandomDigitsNumber(3), expirydate: generateExpiryDate(), accountnumber: generateRandomDigitsNumber(10) },
       // Add more test users as needed
     ];
 
     for (const user of testUsersData) {
       // Insert user into the 'users' table
       const userInsertQuery = `
-        INSERT INTO users (name, surname, username, email, phone, pin, password, balance)
-        VALUES ('${user.name}', '${user.surname}', '${user.username}', '${user.email}', '${user.phone}', '${user.pin}', '${user.password}', ${user.balance})
+        INSERT INTO users (name, surname, username, email, phone, pin, password, balance, cardnumber, cvv, expirydate, accountnumber)
+        VALUES ('${user.name}', '${user.surname}', '${user.username}', '${user.email}', '${user.phone}', '${user.pin}', '${user.password}', ${user.balance}, '${user.cardnumber}', '${user.cvv}', '${user.expirydate}', '${user.accountnumber}')
       `;
       await global.pool.query(userInsertQuery);
 
@@ -38,14 +37,13 @@ const createDummyData = async () => {
         username_sender: user.username,
         title: 'Transaction from ' + user.username,
         amount: getRandomInt(10, 1000),
-        username_receiver: 'test' + getRandomInt(1, 5),
+        username_receiver: 'test' + getRandomInt(1, 5)
       }));
 
       const transactionsValuesClause = testTransactionsData
         .filter(transaction => transaction.username_sender !== transaction.username_receiver) // Filter out transactions with the same sender and receiver
         .map(transaction => `('${transaction.username_sender}', '${transaction.title}', ${transaction.amount}, '${transaction.username_receiver}')`)
         .join(',');
-      console.log(transactionsValuesClause)
 
       const transactionsInsertQuery = `
         INSERT INTO transactions (username_sender, title, amount, username_receiver)
