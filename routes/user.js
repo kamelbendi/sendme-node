@@ -13,6 +13,18 @@ Router.get('/getqrcode', async (req, res) => {
     }
 });
 
+Router.post('/deleteaccount', async (req, res) => {
+    const { email } = req.body;
+    try {
+      const queryResult = await global.pool.query('DELETE FROM users WHERE email = $1;', [email]);
+      res.status(200).json({ success: true });
+      console.log('Account deleted successfully');
+    } catch (error) {
+      console.error('Error executing query:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 Router.post('/getaccountnumber', async (req, res) => {
     const { username } = req.body;
     try {
@@ -170,7 +182,7 @@ Router.post('/login', async (req, res) => {
           expiresIn: '1d'
         });
 
-        res.status(200).send({ token });
+        res.status(200).send({ user, token });
       } catch (error) {
         console.error(error);
         res.status(500).send({ error: 'Internal Server Error' });
