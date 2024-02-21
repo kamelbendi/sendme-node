@@ -64,4 +64,21 @@ Router.post('/check-email', async (req, res) => {
     }
 });
 
+Router.post('/username-exists', async (req, res) => {
+  const { username } = req.body;
+
+    try {
+      // Query to check if the username already exists
+      const queryResult = await global.pool.query('SELECT * FROM users WHERE username = $1;', [username]);
+      if (queryResult.rows.length === 1) {
+        res.json({ exists: true });
+      } else {
+        res.json({ exists: false });
+      }
+    } catch (error) {
+      console.error('Error executing query:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+})
+
 module.exports = Router;
