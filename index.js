@@ -2,6 +2,7 @@ const winston = require('winston');
 const express = require('express');
 const authRoute = require('./routes/auth.js');
 const userRoute = require('./routes/user.js');
+const atmRoute = require('./routes/atm.js');
 const { createDatabase, deleteDatabase, createUsersTable } = require('./db/db.js');
 const { setupTestData } = require('./db/setup.js');
 const bcrypt = require('bcrypt');
@@ -25,6 +26,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(authRoute);
 app.use(userRoute);
+app.use(atmRoute);
 
 const startApp = async () => {
     try {
