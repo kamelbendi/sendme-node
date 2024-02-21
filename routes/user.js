@@ -3,13 +3,36 @@ const Router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-Router.get('/getqrcode', async (req, res) => {
+Router.post('/transfer', async (req, res) => {
+    const { username_sender, username_receiver, amount } = req.body;
+    
     try {
-        
+      const queryResult = await global.pool.query('SELECT * FROM users WHERE username = $1;', [username_sender]);
+      const sender = queryResult.rows[0];
+      if (sender.balance < amount) {
+        console.log('Insufficient funds');
+        return res.status(400).send({
+          transfer_error: 'Insufficient funds.'
+        });
+      }
+      const result = await global.pool.query('SELECT * FROM users WHERE username = $1', [username_receiver]);
+      const receiver = result.rows[0];
+      if (receiver) {
+        const transaction = await global.pool.query('INSERT INTO transactions (username_sender, title, amount, username_receiver) VALUES ($1, $2, $3, $4) RETURNING id, amount, username_sender, username_receiver;', [req.body.username_sender, 'Transfer from ' + req.body.username_sender, req.body.amount, req.body.username_receiver]);
+        const { id, amount, username_sender, username_receiver } = transaction.rows[0];
+        const updateSenderBalanceQuery = 'UPDATE users SET balance = balance - $1 WHERE username = $2;';
+        const updateReceiverBalanceQuery = 'UPDATE users SET balance = balance + $1 WHERE username = $2;';
+        await global.pool.query(updateSenderBalanceQuery, [amount, username_sender]);
+        await global.pool.query(updateReceiverBalanceQuery, [amount, username_receiver]);
+        res.status(200).send({ id, amount, username_sender, username_receiver });
+      } else {
+        res.status(400).send({
+          transfer_error: 'Receiver not found.'
+        });
+      }
     } catch (error) {
-      res.status(400).send({
-        update_error: 'Error while signing up..Try again later.'
-      });
+      console.error('Error executing query:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
@@ -50,7 +73,6 @@ Router.post('/getbalance', async (req, res) => {
         const queryResult = await global.pool.query('SELECT * FROM users WHERE username = $1;', [username]);
 
         if (queryResult.rows.length > 0) {
-          console.log(queryResult.rows[0].balance);
             const balance = queryResult.rows[0].balance;
             res.status(200).json({ balance });
         } else {
@@ -73,7 +95,7 @@ Router.post('/gettransactions', async (req, res) => {
         UNION
         SELECT * FROM transactions 
         WHERE username_receiver = $1 
-        ORDER BY timestamp;
+        ORDER BY timestamp DESC;
         `,
         [username]);
 
@@ -191,7 +213,7 @@ Router.post('/login', async (req, res) => {
 
 Router.post('/pinlogin', async (req, res) => {
     const { email, pin } = req.body;
-    console.log(email, pin)
+
     try {
       // Query to check if the username already exists
       const queryResult = await global.pool.query('SELECT * FROM users WHERE email = $1;', [email]);
