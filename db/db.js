@@ -1,21 +1,21 @@
 const { Pool } = require('pg');
 
 // Replace the following with your PostgreSQL connection string
-const connectionString = 'postgresql://postgres@localhost:5432/';
+const connectionString = 'postgresql://kamel.bendimerad:Kfq3UQIL4uYV@ep-wild-sky-a50dcqtf-pooler.us-east-2.aws.neon.tech/sendme_postgres?sslmode=require';
 
 global.pool = new Pool({
   connectionString: connectionString,
 });
 
 // Replace 'your_database_name' with the desired database name
-const databaseName = 'sendme_pg';
+const databaseName = 'sendme_postgres';
 
 // Create the database
 const createDatabase = async () => {
     try {
         //Create the database
-        await global.pool.query(`CREATE DATABASE ${databaseName}`);
-        await global.pool.end();
+        // await global.pool.query(`CREATE DATABASE ${databaseName}`);
+        // await global.pool.end();
         console.log(`Database '${databaseName}' created successfully.`);
     } catch {
         console.error('Error creating database');
@@ -24,12 +24,12 @@ const createDatabase = async () => {
 
 const createUsersTable = async () => {
     try {
-        global.pool = new Pool({
-          user: 'postgres',
-          host: 'localhost',
-          port: 5432,
-          database: databaseName, // Connecting to the new database
-        });
+        // global.pool = new Pool({
+        //   user: 'postgres',
+        //   host: 'localhost',
+        //   port: 5432,
+        //   database: databaseName, // Connecting to the new database
+        // });
   
         await global.pool.query(`
           CREATE TABLE IF NOT EXISTS users (
