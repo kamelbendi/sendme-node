@@ -13,10 +13,6 @@ exports.generateRandomDigitsNumber = (length)=>{
     return result;
 };
 
-exports.getCurrentDate=()=>{
-    return new Date();
-};
-
 exports.isValidFieldProvided=(arrayKeys1, arrayKeys2)=>{
     if (arrayKeys1.length !== arrayKeys2.length) {
         return false;

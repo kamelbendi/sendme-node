@@ -16,7 +16,7 @@ const createDatabase = async () => {
         //Create the database
         // await global.pool.query(`CREATE DATABASE ${databaseName}`);
         // await global.pool.end();
-        console.log(`Database '${databaseName}' created successfully.`);
+        //console.log(`Database '${databaseName}' created successfully.`);
     } catch {
         console.error('Error creating database');
     }
@@ -66,10 +66,10 @@ const deleteDatabase = async () => {
         // database: 'postgres', // Connecting to the postgres database
         // });
 
-        await global.pool.query(`DROP DATABASE IF EXISTS ${databaseName} WITH (FORCE)`);
-        console.log(`Database '${databaseName}' deleted successfully.`);
+        await global.pool.query(`DROP TABLE IF EXISTS users, transactions;`);
+        console.log(`table users and transactions deleted successfully.`);
     } catch {
-        console.error('Error deleting database');
+        console.error('Error deleting tables users and transactions');
     }
 }
 

@@ -16,21 +16,26 @@ const createDummyData = async () => {
     const encryptedPin = await bcrypt.hash('111111', 10);
 
     const testUsersData = [
-      { name: 'test1', surname: 'surname1', username: 'test1', email: 'test1@example.com', phone: '123456789', pin: encryptedPin, password: encryptedPassword, balance: 1500, cardnumber: generateRandomDigitsNumber(16), cvv: generateRandomDigitsNumber(3), expirydate: generateExpiryDate(), accountnumber: generateRandomDigitsNumber(10)},
-      { name: 'test2', surname: 'surname2', username: 'test2', email: 'test2@example.com', phone: '123456789', pin: encryptedPin, password: encryptedPassword, balance: 2000, cardnumber: generateRandomDigitsNumber(16), cvv: generateRandomDigitsNumber(3), expirydate: generateExpiryDate(), accountnumber: generateRandomDigitsNumber(10) },
-      { name: 'test3', surname: 'surname3', username: 'test3', email: 'test3@example.com', phone: '123456789', pin: encryptedPin, password: encryptedPassword, balance: 2500, cardnumber: generateRandomDigitsNumber(16), cvv: generateRandomDigitsNumber(3), expirydate: generateExpiryDate(), accountnumber: generateRandomDigitsNumber(10) },
-      { name: 'test4', surname: 'surname4', username: 'test4', email: 'test4@example.com', phone: '123456789', pin: encryptedPin, password: encryptedPassword, balance: 3000, cardnumber: generateRandomDigitsNumber(16), cvv: generateRandomDigitsNumber(3), expirydate: generateExpiryDate(), accountnumber: generateRandomDigitsNumber(10) },
-      { name: 'test5', surname: 'surname5', username: 'test5', email: 't@e.st', phone: '123456789', pin: encryptedPin, password: encryptedPassword, balance: 3000, cardnumber: generateRandomDigitsNumber(16), cvv: generateRandomDigitsNumber(3), expirydate: generateExpiryDate(), accountnumber: generateRandomDigitsNumber(10) },
+      { name: 'test1', surname: 'surname1', username: 'test1', email: 'test1@example.com', phone: '123456789', pin: encryptedPin, password: encryptedPassword, balance: 1500, cardnumber: generateRandomDigitsNumber(16), cvv: generateRandomDigitsNumber(3), expirydate: generateExpiryDate(), accountnumber: generateRandomDigitsNumber(10), iduri: ''},
+      { name: 'test2', surname: 'surname2', username: 'test2', email: 'test2@example.com', phone: '123456789', pin: encryptedPin, password: encryptedPassword, balance: 2000, cardnumber: generateRandomDigitsNumber(16), cvv: generateRandomDigitsNumber(3), expirydate: generateExpiryDate(), accountnumber: generateRandomDigitsNumber(10), iduri: '' },
+      { name: 'test3', surname: 'surname3', username: 'test3', email: 'test3@example.com', phone: '123456789', pin: encryptedPin, password: encryptedPassword, balance: 2500, cardnumber: generateRandomDigitsNumber(16), cvv: generateRandomDigitsNumber(3), expirydate: generateExpiryDate(), accountnumber: generateRandomDigitsNumber(10), iduri: '' },
+      { name: 'test4', surname: 'surname4', username: 'test4', email: 'test4@example.com', phone: '123456789', pin: encryptedPin, password: encryptedPassword, balance: 3000, cardnumber: generateRandomDigitsNumber(16), cvv: generateRandomDigitsNumber(3), expirydate: generateExpiryDate(), accountnumber: generateRandomDigitsNumber(10), iduri: '' },
+      { name: 'test5', surname: 'surname5', username: 'test5', email: 't@e.st', phone: '123456789', pin: encryptedPin, password: encryptedPassword, balance: 3000, cardnumber: generateRandomDigitsNumber(16), cvv: generateRandomDigitsNumber(3), expirydate: generateExpiryDate(), accountnumber: generateRandomDigitsNumber(10), iduri: ''},
       // Add more test users as needed
     ];
 
     for (const user of testUsersData) {
-      // Insert user into the 'users' table
-      const userInsertQuery = `
-        INSERT INTO users (name, surname, username, email, phone, pin, password, balance, cardnumber, cvv, expirydate, accountnumber)
-        VALUES ('${user.name}', '${user.surname}', '${user.username}', '${user.email}', '${user.phone}', '${user.pin}', '${user.password}', ${user.balance}, '${user.cardnumber}', '${user.cvv}', '${user.expirydate}', '${user.accountnumber}')
-      `;
-      await global.pool.query(userInsertQuery);
+      // Check if the user already exists
+      const existingUserQuery = 'SELECT * FROM users WHERE username = $1';
+      const existingUser = await global.pool.query(existingUserQuery, [user.username]);
+
+      if (existingUser.rows.length === 0) {
+        // User doesn't exist, proceed with insertion
+        const userInsertQuery = `
+          INSERT INTO users (name, surname, username, email, phone, pin, password, balance, cardnumber, cvv, expirydate, accountnumber, iduri)
+          VALUES ('${user.name}', '${user.surname}', '${user.username}', '${user.email}', '${user.phone}', '${user.pin}', '${user.password}', ${user.balance}, '${user.cardnumber}', '${user.cvv}', '${user.expirydate}', '${user.accountnumber}', '${user.iduri}');
+        `;
+        await global.pool.query(userInsertQuery);
 
       // Insert transactions for the user into the 'transactions' table
       const testTransactionsData = Array.from({ length: 10 }, () => ({
@@ -79,6 +84,9 @@ const createDummyData = async () => {
       } catch (error) {
         console.error('Error updating balances:', error);
         // Handle error (rollback transaction or other appropriate action)
+      }
+      } else {
+        console.log(`User with username ${user.username} already exists. Skipping insertion.`);
       }
     }
 
