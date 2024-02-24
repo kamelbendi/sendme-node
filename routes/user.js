@@ -145,7 +145,7 @@ Router.post('/getcarddetails', async (req, res) => {
 Router.post('/register', async (req, res) => {
     const userData = req.body;
 
-    const { name, surname, username, email, phone, pin, password } = req.body;
+    const { name, surname, username, email, phone, pin, password, iduri } = req.body;
         const validFieldsToUpdate = [
           'name',
           'surname',
@@ -153,7 +153,8 @@ Router.post('/register', async (req, res) => {
           'email',
           'phone',
           'pin',
-          'password'
+          'password',
+          'iduri',
         ];
 
         const receivedFields = Object.keys(req.body);
@@ -169,12 +170,23 @@ Router.post('/register', async (req, res) => {
           });
         }
 
-        const result = await global.pool.query(
+        const resultEmail = await global.pool.query(
           'select count(*) as count from users where email=$1',
           [email]
         );
-        const count = result.rows[0].count;
-        if (count > 0) {
+        const countEmail = resultEmail.rows[0].count;
+        if (countEmail > 0) {
+          return res.status(400).send({
+            signup_error: 'User with this email address already exists.'
+          });
+        }
+
+        const resultUsername = await global.pool.query(
+          'select count(*) as count from users where email=$1',
+          [email]
+        );
+        const countUsername = resultUsername.rows[0].count;
+        if (countUsername > 0) {
           return res.status(400).send({
             signup_error: 'User with this email address already exists.'
           });
@@ -182,8 +194,8 @@ Router.post('/register', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 8);
         await global.pool.query(
-          'insert into users(name, surname, username, email, phone, pin, password) values($1,$2,$3,$4,$5,$6,$7)',
-          [name, surname, username, email, phone, pin, hashedPassword]
+          'insert into users(name, surname, username, email, phone, pin, password, iduri) values($1,$2,$3,$4,$5,$6,$7, $8)',
+          [name, surname, username, email, phone, pin, hashedPassword, iduri]
         );
 
         res.status(201).send();
