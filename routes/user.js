@@ -4,11 +4,19 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 Router.post('/transfer', async (req, res) => {
-    const { username_sender, username_receiver, amount } = req.body;
+    const { username_sender, username_receiver, amount, pin } = req.body;
     
     try {
       const queryResult = await global.pool.query('SELECT * FROM users WHERE username = $1;', [username_sender]);
+
       const sender = queryResult.rows[0];
+      const isPinMatch = await bcrypt.compare(pin, sender.pin);
+      if (!isPinMatch) {
+        console.log('Invalid PIN');
+        return res.status(400).send({
+          transfer_error: 'Invalid PIN.'
+        });
+      }
       if (sender.balance < amount) {
         console.log('Insufficient funds');
         return res.status(400).send({
