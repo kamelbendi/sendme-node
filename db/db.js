@@ -45,7 +45,8 @@ const createUsersTable = async () => {
               accountnumber VARCHAR(10) UNIQUE,
               cardnumber VARCHAR(16) UNIQUE,
               cvv VARCHAR(3),
-              expirydate VARCHAR(7)
+              expirydate VARCHAR(7),
+              iduri VARCHAR(100)
           );
         `); 
         console.log('Table "users" created successfully');
@@ -57,13 +58,13 @@ const createUsersTable = async () => {
 const deleteDatabase = async () => {
     try {
           // delete the database
-        global.pool.end();
-        global.pool = new Pool({
-        user: 'postgres',
-        host: 'localhost',
-        port: 5432,
-        database: 'postgres', // Connecting to the postgres database
-        });
+        // global.pool.end();
+        // global.pool = new Pool({
+        // user: 'postgres',
+        // host: 'localhost',
+        // port: 5432,
+        // database: 'postgres', // Connecting to the postgres database
+        // });
 
         await global.pool.query(`DROP DATABASE IF EXISTS ${databaseName} WITH (FORCE)`);
         console.log(`Database '${databaseName}' deleted successfully.`);
