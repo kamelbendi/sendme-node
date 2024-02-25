@@ -145,72 +145,78 @@ Router.post('/getcarddetails', async (req, res) => {
 
 Router.post('/register', async (req, res) => {
     const { name, surname, username, email, phone, pin, password, iduri } = req.body;
-        const validFieldsToUpdate = [
-          'name',
-          'surname',
-          'username',
-          'email',
-          'phone',
-          'pin',
-          'password',
-          'iduri',
-        ];
+    try {
 
-        const receivedFields = Object.keys(req.body);
+      const validFieldsToUpdate = [
+        'name',
+        'surname',
+        'username',
+        'email',
+        'phone',
+        'pin',
+        'password',
+        'iduri',
+      ];
 
-        const isValidFieldProvided = isValidFieldProvided( //talk
-          receivedFields,
-          validFieldsToUpdate
-        );
+      const receivedFields = Object.keys(req.body);
 
-        if (isValidFieldProvided) {
-          return res.status(400).send({
-            signup_error: 'Invalid field.'
-          });
-        }
+      const isValidFieldProvided = isValidFieldProvided( //talk
+        receivedFields,
+        validFieldsToUpdate
+      );
 
-        const resultEmail = await global.pool.query(
-          'select count(*) as count from users where email=$1',
-          [email]
-        );
-        const countEmail = resultEmail.rows[0].count;
-        if (countEmail > 0) {
-          console.log('here2')
-          return res.status(400).send({
-            signup_error: 'User with this email address already exists.'
-          });
-        }
+      if (isValidFieldProvided) {
+        return res.status(400).send({
+          signup_error: 'Invalid field.'
+        });
+      }
 
-        const resultUsername = await global.pool.query(
-          'select count(*) as count from users where email=$1',
-          [email]
-        );
-        const countUsername = resultUsername.rows[0].count;
-        if (countUsername > 0) {
-          return res.status(400).send({
-            signup_error: 'User with this email address already exists.'
-          });
-        }
+      const resultEmail = await global.pool.query(
+        'select count(*) as count from users where email=$1',
+        [email]
+      );
+      const countEmail = resultEmail.rows[0].count;
+      if (countEmail > 0) {
+        console.log('here2')
+        return res.status(400).send({
+          signup_error: 'User with this email address already exists.'
+        });
+      }
 
-        const hashedPassword = await bcrypt.hash(password, 8);
-        const hashedPin = await bcrypt.hash(pin, 8);
-        const generatedData = {
-          balance: 0,
-          cardnumber: generateRandomDigitsNumber(16),
-          cvv: generateRandomDigitsNumber(3),
-          expirydate: generateExpiryDate(),
-          accountnumber: generateRandomDigitsNumber(10)
-        }
-        console.log(name, surname, username, email, phone, hashedPin, hashedPassword, generatedData.balance, generatedData.accountnumber, generatedData.cardnumber, generatedData.cvv, generatedData.expirydate, iduri);
-        await global.pool.query(
-          `INSERT INTO users (name, surname, username, email, phone, pin, password, balance, cardnumber, cvv, expirydate, accountnumber, iduri)
-          VALUES ('${name}', '${surname}', '${username}', '${email}', '${phone}', '${hashedPin}', '${hashedPassword}', ${generatedData.balance}, '${generatedData.cardnumber}', '${generatedData.cvv}', '${generatedData.expirydate}', '${generatedData.accountnumber}', '${iduri}');
-        `
-        );
-        
-        res.status(201).send();
+      const resultUsername = await global.pool.query(
+        'select count(*) as count from users where email=$1',
+        [email]
+      );
+      const countUsername = resultUsername.rows[0].count;
+      if (countUsername > 0) {
+        return res.status(400).send({
+          signup_error: 'User with this email address already exists.'
+        });
+      }
 
-})
+      const hashedPassword = await bcrypt.hash(password, 8);
+      const hashedPin = await bcrypt.hash(pin, 8);
+      const generatedData = {
+        balance: 0,
+        cardnumber: generateRandomDigitsNumber(16),
+        cvv: generateRandomDigitsNumber(3),
+        expirydate: generateExpiryDate(),
+        accountnumber: generateRandomDigitsNumber(10)
+      }
+      console.log(name, surname, username, email, phone, hashedPin, hashedPassword, generatedData.balance, generatedData.accountnumber, generatedData.cardnumber, generatedData.cvv, generatedData.expirydate, iduri);
+      await global.pool.query(
+        `INSERT INTO users (name, surname, username, email, phone, pin, password, balance, cardnumber, cvv, expirydate, accountnumber, iduri)
+        VALUES ('${name}', '${surname}', '${username}', '${email}', '${phone}', '${hashedPin}', '${hashedPassword}', ${generatedData.balance}, '${generatedData.cardnumber}', '${generatedData.cvv}', '${generatedData.expirydate}', '${generatedData.accountnumber}', '${iduri}');
+      `
+      );
+      
+      res.status(200).send();
+    } catch {
+        console.error('Error executing query:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+});
 
 Router.post('/login', async (req, res) => {
     try {
