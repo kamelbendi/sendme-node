@@ -204,8 +204,8 @@ Router.post('/register', async (req, res) => {
           accountnumber: generateRandomDigitsNumber(10)
         }
         await global.pool.query(
-          'insert into users(name, surname, username, email, phone, pin, password, blance, cardnumber, cvv, expirydate, accountnumber, iduri) values($1,$2,$3,$4,$5,$6,$7, $8, $9, $10, $11, $12, $13)',
-          [name, surname, username, email, phone, hashedPin, hashedPassword, generatedData.balance, generatedData.cardnumber, generatedData.cvv, generatedData.expirydate, generatedData.accountnumber, iduri]
+          'insert into users(name, surname, username, email, phone, pin, password, balance, accountnumber, cardnumber, cvv, expirydate, iduri) values($1,$2,$3,$4,$5,$6,$7, $8, $9, $10, $11, $12, $13)',
+          [name, surname, username, email, phone, hashedPin, hashedPassword, generatedData.balance, generatedData.accountnumber, generatedData.cardnumber, generatedData.cvv, generatedData.expirydate, iduri]
         );
         
         res.status(201).send();
