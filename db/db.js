@@ -46,7 +46,7 @@ const createUsersTable = async () => {
               cardnumber VARCHAR(16) UNIQUE,
               cvv VARCHAR(3),
               expirydate VARCHAR(7),
-              iduri VARCHAR(100)
+              iduri VARCHAR(1000)
           );
         `); 
         console.log('Table "users" created successfully');

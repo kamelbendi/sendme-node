@@ -2,6 +2,7 @@ const express = require('express');
 const Router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { generateRandomDigitsNumber, generateExpiryDate } = require('../helpers/help');
 
 Router.post('/transfer', async (req, res) => {
     const { username_sender, username_receiver, amount, pin } = req.body;
@@ -144,6 +145,8 @@ Router.post('/getcarddetails', async (req, res) => {
 
 Router.post('/register', async (req, res) => {
     const userData = req.body;
+    console.log(userData);
+    console.log('here1')
 
     const { name, surname, username, email, phone, pin, password, iduri } = req.body;
         const validFieldsToUpdate = [
@@ -165,6 +168,7 @@ Router.post('/register', async (req, res) => {
         );
 
         if (isValidFieldProvided) {
+          console.log('here2')
           return res.status(400).send({
             signup_error: 'Invalid field.'
           });
@@ -176,6 +180,7 @@ Router.post('/register', async (req, res) => {
         );
         const countEmail = resultEmail.rows[0].count;
         if (countEmail > 0) {
+          console.log('here2')
           return res.status(400).send({
             signup_error: 'User with this email address already exists.'
           });
@@ -187,18 +192,29 @@ Router.post('/register', async (req, res) => {
         );
         const countUsername = resultUsername.rows[0].count;
         if (countUsername > 0) {
+          console.log('here3')
           return res.status(400).send({
             signup_error: 'User with this email address already exists.'
           });
         }
 
         const hashedPassword = await bcrypt.hash(password, 8);
-        await global.pool.query(
-          'insert into users(name, surname, username, email, phone, pin, password, iduri) values($1,$2,$3,$4,$5,$6,$7, $8)',
-          [name, surname, username, email, phone, pin, hashedPassword, iduri]
-        );
+        const hashedPin = await bcrypt.hash(pin, 8);
+        const generatedData = {
+          balance: 0,
+          cardnumber: generateRandomDigitsNumber(16),
+          cvv: generateRandomDigitsNumber(3),
+          expirydate: generateExpiryDate(),
+          accountnumber: generateRandomDigitsNumber(10)
+        }
 
+        await global.pool.query(
+          'insert into users(name, surname, username, email, phone, pin, password, iduri, blance, cardnumber, cvv, expirydate, accountnumber) values($1,$2,$3,$4,$5,$6,$7, $8, $9)',
+          [name, surname, username, email, phone, hashedPin, hashedPassword, iduri, generatedData.balance, generatedData.cardnumber, generatedData.cvv, generatedData.expirydate, generatedData.accountnumber]
+        );
+        console.log('hereeee')
         res.status(201).send();
+
 })
 
 Router.post('/login', async (req, res) => {
