@@ -145,8 +145,6 @@ Router.post('/getcarddetails', async (req, res) => {
 
 Router.post('/register', async (req, res) => {
     const userData = req.body;
-    console.log(userData);
-    console.log('here1')
 
     const { name, surname, username, email, phone, pin, password, iduri } = req.body;
         const validFieldsToUpdate = [
@@ -168,7 +166,6 @@ Router.post('/register', async (req, res) => {
         );
 
         if (isValidFieldProvided) {
-          console.log('here2')
           return res.status(400).send({
             signup_error: 'Invalid field.'
           });
@@ -192,7 +189,6 @@ Router.post('/register', async (req, res) => {
         );
         const countUsername = resultUsername.rows[0].count;
         if (countUsername > 0) {
-          console.log('here3')
           return res.status(400).send({
             signup_error: 'User with this email address already exists.'
           });
@@ -207,12 +203,11 @@ Router.post('/register', async (req, res) => {
           expirydate: generateExpiryDate(),
           accountnumber: generateRandomDigitsNumber(10)
         }
-
         await global.pool.query(
-          'insert into users(name, surname, username, email, phone, pin, password, iduri, blance, cardnumber, cvv, expirydate, accountnumber) values($1,$2,$3,$4,$5,$6,$7, $8, $9)',
-          [name, surname, username, email, phone, hashedPin, hashedPassword, iduri, generatedData.balance, generatedData.cardnumber, generatedData.cvv, generatedData.expirydate, generatedData.accountnumber]
+          'insert into users(name, surname, username, email, phone, pin, password, blance, cardnumber, cvv, expirydate, accountnumber, iduri) values($1,$2,$3,$4,$5,$6,$7, $8, $9, $10, $11, $12, $13)',
+          [name, surname, username, email, phone, hashedPin, hashedPassword, generatedData.balance, generatedData.cardnumber, generatedData.cvv, generatedData.expirydate, generatedData.accountnumber, iduri]
         );
-        console.log('hereeee')
+        
         res.status(201).send();
 
 })
