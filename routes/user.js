@@ -2,7 +2,7 @@ const express = require('express');
 const Router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { generateRandomDigitsNumber, generateExpiryDate } = require('../helpers/help');
+const { generateRandomDigitsNumber, generateExpiryDate, isValidFieldProvided } = require('../helpers/help');
 
 Router.post('/transfer', async (req, res) => {
     const { username_sender, username_receiver, amount, pin } = req.body;
@@ -160,12 +160,12 @@ Router.post('/register', async (req, res) => {
 
       const receivedFields = Object.keys(req.body);
 
-      const isValidFieldProvided = isValidFieldProvided( //talk
+      const isValidField = isValidFieldProvided( //talk
         receivedFields,
         validFieldsToUpdate
       );
 
-      if (isValidFieldProvided) {
+      if (!isValidField) {
         return res.status(400).send({
           signup_error: 'Invalid field.'
         });
@@ -184,8 +184,8 @@ Router.post('/register', async (req, res) => {
       }
 
       const resultUsername = await global.pool.query(
-        'select count(*) as count from users where email=$1',
-        [email]
+        'select count(*) as count from users where username=$1',
+        [username]
       );
       const countUsername = resultUsername.rows[0].count;
       if (countUsername > 0) {
@@ -211,7 +211,7 @@ Router.post('/register', async (req, res) => {
       );
       
       res.status(200).send();
-    } catch {
+    } catch (error) {
         console.error('Error executing query:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
